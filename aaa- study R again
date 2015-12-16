@@ -1,0 +1,478 @@
+
+
+This document is produced by **"knitr"** package in R. The text in grey boxes are R codes, following them are the running results.
+
+# Pre: install and update
+
+## Painless way to update R
+
+#run in old version
+packages <- installed.packages()[,"Packages"]
+write.table(packages,"rpackages.txt")
+
+#run in new version
+packages <- read.table("rpackages.txt")
+packages.1 <- packages[,1]
+names(packages) <- rownames(packages)
+packages.2 <- setdiff(packages.1, packages.2)
+install.packages(packages.2)
+
+
+# 1 Read and write data
+
+I suggest you transform your table into the **".csv"** format to be read conveniently.
+
+# 2 Data structure and fundamental manipulation‘
+
+## 2.1 Factors
+
+Notebaly, we can change the orders of levels of a factor.
+
+```{r}
+sizes <- ordered(c("small", "large", "large", "small", "medium")); sizes
+
+# specify the oders of levels
+sizes <- ordered(sizes, levels = c("small", "medium", "large")); sizes
+```
+
+## 2.1 
+Basically, there are three atomic type data in R: **character**, **factor**, **logical**, **complex**, **raw**, and **numeric**. 
+Take more care anout this point, remember to transfer the data to proper type when you handle **numeric analysis** afetr calculation.
+
+## 2.2 Vector
+
+Construct a vector "lv" with the raw data, **number** or **chart**, then get the data at specific positions.
+
+```{r,results='hide'}
+# Create vector using "seq", "rep"
+x=seq(-4,4,by=0.1)
+y2=c(y1,rep(0,length(x1)))
+
+lv <- 1:100
+lv.odd <- lv[2*(1:50)]
+lv.chart <- rep(letters[1:25],4)
+merge.column <- cbind(lv, lv.odd, lv.chart)
+merge.row <- rbind(lv, lv.odd, lv.chart)
+lv
+lv.odd
+lv.chart
+```
+
+
+Construct a vector filled with NULL or 0, then fill the vector at specific positions, this is widely used when you need some variables to place your results from a series of calculations automatically, like in a **for circulation**.
+
+```{r,warning=FALSE}
+lv.null <- NULL
+lv.zero <- numeric(100)
+lv.null[101] <- 101
+lv.null[2 * (1:50)] <- 2 * (1:500) + 1
+```
+
+Now, we have a simple exmple to try how to use the **NULL vector** or **zero vector** in a circulation.
+
+```{r}
+#Please calculate the sum of 1, 1 + 2, 1 + 2 + 3... and put the results (How many?) into a NULL vector
+result <- NULL
+sum <- 0
+for(i in 1:100)
+  {  
+  sum<-sum+i
+  result[i] <- sum
+  }
+
+```
+
+## 2.3 Matrix
+## 2.4 Dataframe
+```{r}
+# Two ways to get and delete speceific columns, but there is a little difference
+q1 <- 1:10
+q2 <- 10:19
+q3 <- 20:29
+data <- data.frame(q1,q2,q3)
+class(data["q1"])
+class(data$q1)
+class(data[,1])
+# 
+haha <- names(data) %in% "q2"
+data[!haha]
+data[,-2]
+
+
+```
+## 2.5 List
+
+```{r}
+
+lv.list<-list(null=lv.null,zero=lv.zero,result=result)
+lv.list$null <- 1:100;#or, lv.list[[1]]<-1:100
+lv.list$zero; #lv.list[[2]]<-zero
+lv.list$result[3]; lv.list[[3]]<-result[3]
+lv.list$haha <-1:50
+lv.list$name1 <- 50:100
+name1<-paste("test" ,"hah", seq="")
+
+# We can also put result into list object before defined the components names
+i.am.list <- NULL
+i.am.list[[1]] <- data.frame(no = 1:26, abc = letters)
+```
+
+# 3 Reshape the data
+
+## 3.1 Mmerge data
+
+```{r}
+#setdiff
+#match() + rbind()
+#match() + merge()
+
+#merge() # It is very convinient when handle huge data We donnot care about "NA".
+authors <- data.frame(
+  surname = I(c("Tukey", "Venables", "Tierney", "Ripley", "McNeil")),
+  nationality = c("US", "Australia", "US", "UK", "Australia"),
+  deceased = c("yes", rep("no", 4)))
+books <- data.frame(
+  name = I(c("Tukey", "Venables", "Tierney",
+             "Ripley", "Ripley", "McNeil", "R Core")),
+  title = c("Exploratory Data Analysis",
+            "Modern Applied Statistics ...",
+            "LISP-STAT",
+            "Spatial Statistics", "Stochastic Simulation",
+            "Interactive Data Analysis",
+            "An Introduction to R"),
+  other.author = c(NA, "Ripley", NA, NA, NA, NA,
+                   "Venables & Smith"))
+
+(m1 <- merge(authors, books, by.x = "surname", by.y = "name"))
+(m2 <- merge(books, authors, by.x = "name", by.y = "surname"))
+stopifnot(as.character(m1[, 1]) == as.character(m2[, 1]),
+          all.equal(m1[, -1], m2[, -1][ names(m1)[-1] ]),
+          dim(merge(m1, m2, by = integer(0))) == c(36, 10))
+# inner join
+m1 <- merge(authors, books, by.x = "surname", by.y = "name")
+# left join
+m1 <- merge(authors, books, by.x = "surname", by.y = "name",all.x=TRUE)
+# right join
+m1 <- merge(authors, books, by.x = "surname", by.y = "name",all.y=TRUE)
+# all join
+m1 <- merge(authors, books, by.x = "surname", by.y = "name",all=TRUE)
+
+rbind()
+```
+
+**merge** is more flexible than rbind. **rbind** are frequently used in cobining several vectors  to a data frame. 
+ 
+## 3.2 Split data
+
+```{r}
+#split()
+#aggregate()
+#subset()
+```
+
+# 4 Batch processing
+
+R programming are famous for its batch processing.
+
+## Process control
+
+```{r}
+# if ()
+# for ()
+# ifelse
+n <- 100
+x <- runif(n)
+z <- ifelse(x>.5,1,0)
+y <- 2*z -x + .1*rnorm(n)
+par(fig=c(0,1,0,1),new=F)
+plot( y~x, col=c('red','blue')[1+z])
+```
+
+## Implicit loop
+
+
+# apply() #apply a specific function to each row or column in a matrix or dataframe
+
+```{r}
+
+```
+
+# tapply() #apply a specific function to each group of values by a unique levels of factors. It is very easy generate contingency table using "tapply" too.
+```{r}
+require(stats)
+groups <- as.factor(rbinom(32, n = 5, prob = 0.4))
+tapply(groups, groups, length) #- is almost the same as
+table(groups)
+
+n <- 17; fac <- factor(rep(1:3, length = n), levels = 1:5)
+table(fac)
+tapply(1:n, fac, sum)
+tapply(1:n, fac, sum, simplify = FALSE)
+tapply(1:n, fac, range)
+tapply(1:n, fac, quantile)
+
+## contingency table from data.frame : array with named dimnames
+tapply(warpbreaks$breaks, warpbreaks[,-1], sum)
+tapply(warpbreaks$breaks, warpbreaks[, 3, drop = FALSE], sum)
+
+## example of ... argument
+tapply(presidents, cycle(presidents), mean, na.rm = TRUE)
+
+## If FUN is NULL, tapply returns a vector which can be used to subscript the multi-way array
+
+ind <- list(c(1, 2, 2), c("A", "A", "B"))
+table(ind)
+tapply(3:5, ind) #-> the split vector
+ct <- tapply(3:5, ind, sum)
+```
+
+
+#lapply() # input:list --> output:list; sapply: list --> matrix; vapply: list --> matrix
+
+```{r}
+# Example 1: apply a function to each component of a list
+x <- list(a = 1:10, beta = exp(-3:3), logic = c(TRUE,FALSE,FALSE,TRUE))
+lapply(x, mean)
+
+#Example 2: run a function with a vector of arguments in the function:No need for!!! 
+ntrait <- c(1, 10, 100, 1000)
+lappy(ntait, FUN=pd.ed, phylo=phylo.prune, sr=2)
+
+# median and quartiles for each list element
+lapply(x, quantile, probs = 1:3/4)
+sapply(x, quantile)
+
+i39 <- sapply(3:9, seq) # list of vectors
+sapply(i39, fivenum)
+vapply(i39, fivenum,c(Min. = 0, "1st Qu." = 0, Median = 0, "3rd Qu." = 0, Max. = 0))
+
+## sapply(*, "array") -- artificial example
+(v <- structure(10*(5:8), names = LETTERS[1:4]))
+f2 <- function(x, y) outer(rep(x, length.out = 3), y)
+
+outer(rep(50, length.out = 3), 2*(1:5))
+
+(a2 <- sapply(v, f2, y = 2*(1:5), simplify = "array")) 
+a.2 <- vapply(v, f2, outer(1:3, 1:5), y = 2*(1:5)) ## a pre-specified type of "sapply"
+
+```
+
+
+## split()
+
+```{r}
+require(stats); require(graphics)
+n <- 10; nn <- 100
+g <- factor(round(n * runif(n * nn)))
+x <- rnorm(n * nn) + sqrt(as.numeric(g))
+xg <- split(x, g)
+boxplot(xg, col = "lavender", notch = TRUE, varwidth = TRUE)
+sapply(xg, length)
+sapply(xg, mean)
+
+### Calculate 'z-scores' by group (standardize to mean zero, variance one)
+z <- unsplit(lapply(split(x, g), scale), g)
+
+# or
+
+zz <- x
+split(zz, g) <- lapply(split(x, g), scale)
+
+# and check that the within-group std dev is indeed one
+tapply(z, g, sd)
+tapply(zz, g, sd)
+
+
+### data frame variation
+
+## Notice that assignment form is not used since a variable is being added
+
+g <- airquality$Month
+l <- split(airquality, g)
+l <- lapply(l, transform, Oz.Z = scale(Ozone))
+aq2 <- unsplit(l, g)
+head(aq2)
+with(aq2, tapply(Oz.Z,  Month, sd, na.rm = TRUE))
+
+
+### Split a matrix into a list by columns
+ma <- cbind(x = 1:10, y = (-4:5)^2)
+split(ma, col(ma))
+
+split(1:10, 1:2)
+
+```
+
+#aggregate()
+
+## Repeated codes: creat by other programming or R codes
+
+melt(ChickWeight, id=2:4)
+
+# Low-level plots function in graphics
+
+```{r}
+## Basic plot function
+#plot()
+#abline()
+#lines()
+#curve()
+#points()
+#polygon()
+#text()
+#expression
+#legend()
+#rug()
+
+#par():mfrow, fig, cex, col
+#axis
+
+##layout
+#par()
+#layout()
+
+
+x1=rnorm(100)
+x2=rnorm(100)
+x3=rnorm(100)
+m=cor(cbind(x1,x2,x3))
+plot(x1, x2, cex= 5*abs(x1),xlim=c(0, dim(m)[2]+1),ylim=c(0, dim(m)[1]+1))
+col(m)
+
+# Using "rug" to add density bar on one axis
+x <- rnorm(100)
+plot(sort(x))
+rug(x,side=2)
+
+# Plot curve using a expression or function
+curve(sin(x),-10,10)
+curve(dnorm(x),-3,3)
+
+# "line" functions can also be used to plot curve
+X=c(10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0)
+Y2=c(9.14,8.14, 8.74,8.77,9.26,8.10,6.13,3.10, 9.13,7.26,4.74)
+plot(Y2~X)
+o <- order(X)
+X.o <- X[o]
+Y2.o<-Y2[o]
+lines(X.o,Y2.o,col="red")
+
+
+# Bubble plots: specify colors for each points, no need to plot twice; similarly, plots points with different colors and size using "col" and "cex", respectively.
+n <- 100
+x <- runif(n)
+z <- ifelse(x>.5,1,0)
+y <- 2*z -x + .1*rnorm(n)
+par(fig=c(0,1,0,1),new=F)
+plot( y~x, col=c('red','blue')[1+z])
+
+# Similarly, we can add text to each point, which is very useful when we are exploring the data!
+x <- 1:10
+y <- x + rnorm(10)
+points <- paste("point", 1:10, sep="")
+plot(x,y)
+text(x, y, points,pos=4)
+
+
+# 4 figures arranged in 2 rows and 2 columns
+attach(mtcars)
+par(mfrow=c(2,2))
+plot(wt,mpg, main="Scatterplot of wt vs. mpg")
+plot(wt,disp, main="Scatterplot of wt vs disp")
+hist(wt, main="Histogram of wt")
+boxplot(wt, main="Boxplot of wt")
+
+# 3 figures arranged in 3 rows and 1 column
+attach(mtcars)
+par(mfrow=c(3,1)) 
+hist(wt)
+hist(mpg)
+hist(disp)
+
+# One figure in row 1 and two figures in row 2
+attach(mtcars)
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+hist(wt)
+hist(mpg)
+hist(disp)
+
+# One figure in row 1 and two figures in row 2
+# row 1 is 1/3 the height of row 2
+# column 2 is 1/4 the width of the column 1 
+attach(mtcars)
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), 
+  	widths=c(3,1), heights=c(1,2))
+hist(wt)
+hist(mpg)
+hist(disp)
+
+# Add boxplots to a scatterplot
+par(fig=c(0,0.8,0,0.8), new=FALSE)
+plot(mtcars$wt, mtcars$mpg, xlab="Car Weight",
+  ylab="Miles Per Gallon")
+par(fig=c(0,0.8,0.55,1), new=TRUE)
+boxplot(mtcars$wt, horizontal=TRUE, axes=FALSE)
+par(fig=c(0.75,1.,0,0.8),new=TRUE)
+boxplot(mtcars$mpg, axes=FALSE)
+mtext("Enhanced Scatterplot", side=3, outer=TRUE, line=-3)
+
+# Add a histgram to a QQ-plot
+n <- 1000
+x <- rnorm(n)
+qqnorm(x)
+qqline(x, col="red")
+op <- par(fig=c(.02,.5,.5,.98), new=TRUE)
+hist(x, probability=T, col="light blue", xlab="", ylab="", main="", axes=F)
+lines(density(x), col="red", lwd=2)
+box()
+
+
+```
+
+# High-level plots functions in lattice package
+
+```{r,}
+# Lattice Examples 
+library(lattice) 
+attach(mtcars)
+
+# create factors with value labels 
+gear.f<-factor(gear,levels=c(3,4,5), labels=c("3gears","4gears","5gears")) 
+cyl.f <-factor(cyl,levels=c(4,6,8), labels=c("4cyl","6cyl","8cyl")) 
+
+# kernel density plot 
+densityplot(~mpg, main="Density Plot", 	xlab="Miles per Gallon")
+
+# kernel density plots by factor level 
+densityplot(~mpg|cyl.f, main="Density Plot by Number of Cylinders", xlab="Miles per Gallon")
+
+# kernel density plots by factor level (alternate layout) 
+densityplot(~mpg|cyl.f, main="Density Plot by Numer of Cylinders", xlab="Miles per Gallon", layout=c(1,3))
+
+# boxplots for each combination of two factors 
+# boxplots for each combination of two factors 
+bwplot(cyl.f~mpg|gear.f, ylab="Cylinders", xlab="Miles per Gallon", main="Mileage by Cylinders and Gears", layout=(c(1,3)))
+   
+# scatterplots for each combination of two factors 
+xyplot(mpg~wt|cyl.f*gear.f, main="Scatterplots by Cylinders and Gears", ylab="Miles per Gallon", xlab="Car Weight")
+
+# 3d scatterplot by factor level 
+cloud(mpg~wt*qsec|cyl.f, main="3D Scatterplot by Cylinders") 
+
+# dotplot for each combination of two factors 
+dotplot(cyl.f~mpg|gear.f, main="Dotplot Plot by Number of Gears and Cylinders", xlab="Miles Per Gallon")
+
+# scatterplot matrix 
+splom(mtcars[c(1,3,4,5,6)], main="MTCARS Data")
+
+# Customized Lattice Example
+library(lattice)
+panel.smoother <- function(x, y) {
+  panel.xyplot(x, y) # show points 
+  panel.loess(x, y)  # show smoothed line 
+}
+attach(mtcars)
+hp <- cut(hp,3) # divide horse power into three bands 
+xyplot(mpg~wt|hp, scales=list(cex=.8, col="red"),	panel=panel.smoother, xlab="Weight", ylab="Miles per Gallon", main="MGP vs Weight by Horse Power")
+
+```
